@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option go_package = "web/hw1/auth";
+package auth;
+
+service Auth {
+  rpc req_pq (Req_pq_input) returns (Req_pq_response) {}
+  rpc req_DH_params(Req_DH_params_input) returns (Req_DH_params_response) {}
+}
+
+message Req_pq_input {
+  string nonce = 1;
+  int32 message_id = 2;
+}
+
+message Req_pq_response {
+  string nonce = 1;
+  string server_nonce = 2;
+  int32 message_id = 3;
+  int32  p = 4;
+  int32  g = 5;
+}
+
+
+message Req_DH_params_input {
+  string nonce = 1;
+  string server_nonce = 2;
+  int32 message_id = 3;
+  int32  a = 4;
+}
+
+message Req_DH_params_response {
+  string nonce = 1;
+  string server_nonce = 2;
+  int32 message_id = 3;
+  int32  b = 4;
+}
