@@ -9,6 +9,8 @@ import (
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const pgMethodName = "pg"
+const dhMethodName = "dh"
 
 type PgParams struct {
 	p           int
@@ -36,7 +38,7 @@ func getPg(nonce string, requestMessageId string) PgParams {
 	pgResponse := PgParams{23, 5, nonce, serverNonce, responseMessageId}
 
 	// save to cache
-	cacheKey := getCacheKey(nonce, serverNonce)
+	cacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
 	cacheData(nil, cacheKey, pgResponse.String(), 20*time.Minute)
 
 	return pgResponse
@@ -44,14 +46,20 @@ func getPg(nonce string, requestMessageId string) PgParams {
 
 func getDHParams(nonce string, serverNonce string, messageId int, requestPublicKey int) DHParams {
 	b := randomInt()
-	// TODO get PgParams from cache
-	pgParams := PgParams{23, 5, nonce, serverNonce, messageId}
+	// get PgParams from cache
+	pgCacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
+	pgParamsString := getValue(nil, pgCacheKey)
+	pgParams, err := getPgParamsFromString(pgParamsString)
+	if err != nil {
+		return DHParams{}
+		// TODO what is the correct thing to do here?
+	}
 
 	responsePublicKey := (pgParams.g ^ b) % pgParams.p
-
 	commonKey := (requestPublicKey ^ b) % pgParams.p
-	fmt.Println(commonKey)
-	// TODO cache common key
+
+	dhCacheKey := getCacheKey(nonce, serverNonce, dhMethodName)
+	cacheData(nil, dhCacheKey, string(rune(commonKey)), 20*time.Minute)
 
 	responseMessageId := randomOddInt()
 	dhParams := DHParams{
@@ -63,10 +71,26 @@ func getDHParams(nonce string, serverNonce string, messageId int, requestPublicK
 	return dhParams
 }
 
-func getCacheKey(nonce string, serverNonce string) string {
-	// concat nonce and serverNonce and then hash	 them with sha1
-	combination := nonce + serverNonce
-	return hashWithSHA1(combination)
+func getPgParamsFromString(pgParamsString string) (PgParams, error) {
+	pgParams := PgParams{}
+	_, err := fmt.Sscanf(
+		pgParamsString,
+		"%d %d %s %s %d",
+		&pgParams.p,
+		&pgParams.g,
+		&pgParams.nonce,
+		&pgParams.serverNonce,
+		&pgParams.messageId,
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return pgParams, err
+
+}
+
+func getCacheKey(nonce string, serverNonce string, methodName string) string {
+	return methodName + "_" + hashWithSHA1(nonce+serverNonce)
 }
 
 func randomString(length int) string {
