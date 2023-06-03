@@ -31,7 +31,7 @@ type DHParams struct {
 	PublicKey   int
 }
 
-func GetPg(nonce string, requestMessageId int32) PgParams {
+func GetPg(nonce string, requestMessageId int) PgParams {
 	// generate the response
 	responseMessageId := randomOddInt()
 	serverNonce := randomString(20)
@@ -44,15 +44,15 @@ func GetPg(nonce string, requestMessageId int32) PgParams {
 	return pgResponse
 }
 
-func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicKey int) DHParams {
+func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicKey int) (DHParams, error) {
 	b := randomInt()
 	// get PgParams from cache
 	pgCacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
 	pgParamsString := getValue(nil, pgCacheKey)
+
 	pgParams, err := getPgParamsFromString(pgParamsString)
 	if err != nil {
-		return DHParams{}
-		// TODO what is the correct thing to do here?
+		return DHParams{}, fmt.Errorf("pgParams not found or expired for nonce %s and serverNonce %s", nonce, serverNonce)
 	}
 
 	responsePublicKey := (pgParams.G ^ b) % pgParams.P
@@ -68,7 +68,7 @@ func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicK
 		MessageId:   responseMessageId,
 		PublicKey:   responsePublicKey,
 	}
-	return dhParams
+	return dhParams, nil
 }
 
 func getPgParamsFromString(pgParamsString string) (PgParams, error) {

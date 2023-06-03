@@ -10,7 +10,7 @@ type server struct {
 }
 
 func (s *server) ReqPq(ctx context.Context, input *ReqPqInput) (*ReqPqResponse, error) {
-	pg := service.GetPg(input.Nonce, input.MessageId)
+	pg := service.GetPg(input.Nonce, int(input.MessageId))
 	return &ReqPqResponse{
 		Nonce:       pg.Nonce,
 		ServerNonce: pg.ServerNonce,
@@ -21,7 +21,10 @@ func (s *server) ReqPq(ctx context.Context, input *ReqPqInput) (*ReqPqResponse, 
 }
 
 func (s *server) Req_DHParams(ctx context.Context, input *Req_DHParamsInput) (*Req_DHParamsResponse, error) {
-	dh := service.GetDHParams(input.Nonce, input.ServerNonce, int(input.MessageId), int(input.A))
+	dh, err := service.GetDHParams(input.Nonce, input.ServerNonce, int(input.MessageId), int(input.A))
+	if err != nil {
+		return nil, err
+	}
 	return &Req_DHParamsResponse{
 		Nonce:       dh.Nonce,
 		ServerNonce: dh.ServerNonce,
