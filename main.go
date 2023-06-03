@@ -1,14 +1,14 @@
 package main
 
 import (
-	_ "fmt"
-	grpc "google.golang.org/grpc"
+	"fmt"
+	"google.golang.org/grpc"
 	"log"
 	"net"
 )
 
 func main() {
-	println("gRPC auth server")
+	fmt.Println("gRPC auth server")
 
 	listener, err := net.Listen("tcp", ":5052")
 	if err != nil {

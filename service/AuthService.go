@@ -13,25 +13,25 @@ const pgMethodName = "pg"
 const dhMethodName = "dh"
 
 type PgParams struct {
-	p           int
-	g           int
-	nonce       string
-	serverNonce string
-	messageId   int
+	P           int
+	G           int
+	Nonce       string
+	ServerNonce string
+	MessageId   int
 }
 
 func (pg PgParams) String() string {
-	return fmt.Sprintf("%d %d %s %s %d", pg.p, pg.g, pg.nonce, pg.serverNonce, pg.messageId)
+	return fmt.Sprintf("%d %d %s %s %d", pg.P, pg.G, pg.Nonce, pg.ServerNonce, pg.MessageId)
 }
 
 type DHParams struct {
-	nonce       string
-	serverNonce string
-	messageId   int
-	publicKey   int
+	Nonce       string
+	ServerNonce string
+	MessageId   int
+	PublicKey   int
 }
 
-func getPg(nonce string, requestMessageId string) PgParams {
+func GetPg(nonce string, requestMessageId int32) PgParams {
 	// generate the response
 	responseMessageId := randomOddInt()
 	serverNonce := randomString(20)
@@ -44,7 +44,7 @@ func getPg(nonce string, requestMessageId string) PgParams {
 	return pgResponse
 }
 
-func getDHParams(nonce string, serverNonce string, messageId int, requestPublicKey int) DHParams {
+func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicKey int) DHParams {
 	b := randomInt()
 	// get PgParams from cache
 	pgCacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
@@ -55,18 +55,18 @@ func getDHParams(nonce string, serverNonce string, messageId int, requestPublicK
 		// TODO what is the correct thing to do here?
 	}
 
-	responsePublicKey := (pgParams.g ^ b) % pgParams.p
-	commonKey := (requestPublicKey ^ b) % pgParams.p
+	responsePublicKey := (pgParams.G ^ b) % pgParams.P
+	commonKey := (requestPublicKey ^ b) % pgParams.P
 
 	dhCacheKey := getCacheKey(nonce, serverNonce, dhMethodName)
 	cacheData(nil, dhCacheKey, string(rune(commonKey)), 20*time.Minute)
 
 	responseMessageId := randomOddInt()
 	dhParams := DHParams{
-		nonce:       nonce,
-		serverNonce: serverNonce,
-		messageId:   responseMessageId,
-		publicKey:   responsePublicKey,
+		Nonce:       nonce,
+		ServerNonce: serverNonce,
+		MessageId:   responseMessageId,
+		PublicKey:   responsePublicKey,
 	}
 	return dhParams
 }
@@ -76,11 +76,11 @@ func getPgParamsFromString(pgParamsString string) (PgParams, error) {
 	_, err := fmt.Sscanf(
 		pgParamsString,
 		"%d %d %s %s %d",
-		&pgParams.p,
-		&pgParams.g,
-		&pgParams.nonce,
-		&pgParams.serverNonce,
-		&pgParams.messageId,
+		&pgParams.P,
+		&pgParams.G,
+		&pgParams.Nonce,
+		&pgParams.ServerNonce,
+		&pgParams.MessageId,
 	)
 	if err != nil {
 		fmt.Println(err)
