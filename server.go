@@ -3,6 +3,7 @@ package main
 import (
 	"AuthServer/service"
 	"context"
+	"fmt"
 )
 
 type server struct {
@@ -10,6 +11,7 @@ type server struct {
 }
 
 func (s *server) ReqPq(ctx context.Context, input *ReqPqInput) (*ReqPqResponse, error) {
+	fmt.Println("Received ReqPq request", input)
 	pg := service.GetPg(input.Nonce, int(input.MessageId))
 	return &ReqPqResponse{
 		Nonce:       pg.Nonce,
@@ -21,8 +23,10 @@ func (s *server) ReqPq(ctx context.Context, input *ReqPqInput) (*ReqPqResponse, 
 }
 
 func (s *server) Req_DHParams(ctx context.Context, input *Req_DHParamsInput) (*Req_DHParamsResponse, error) {
+	fmt.Println("Received Req_DHParams request", input)
 	dh, err := service.GetDHParams(input.Nonce, input.ServerNonce, int(input.MessageId), int(input.A))
 	if err != nil {
+		fmt.Println("Error getting DH params", err)
 		return nil, err
 	}
 	return &Req_DHParamsResponse{

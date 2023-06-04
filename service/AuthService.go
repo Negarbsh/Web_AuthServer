@@ -48,7 +48,10 @@ func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicK
 	b := randomInt()
 	// get PgParams from cache
 	pgCacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
-	pgParamsString := GetValue(nil, pgCacheKey)
+	pgParamsString, err := getValue(nil, pgCacheKey)
+	if err != nil {
+		return DHParams{}, fmt.Errorf("pgParams not found or expired for nonce %s and serverNonce %s", nonce, serverNonce)
+	}
 
 	pgParams, err := getPgParamsFromString(pgParamsString)
 	if err != nil {
