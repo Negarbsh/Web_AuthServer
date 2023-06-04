@@ -19,7 +19,7 @@ func startRedisConnection() {
 	initialized = true
 }
 
-func getValue(ctx context.Context, key string) string {
+func GetValue(ctx context.Context, key string) string {
 	if !initialized {
 		startRedisConnection()
 	}

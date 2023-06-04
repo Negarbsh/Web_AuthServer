@@ -48,7 +48,7 @@ func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicK
 	b := randomInt()
 	// get PgParams from cache
 	pgCacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
-	pgParamsString := getValue(nil, pgCacheKey)
+	pgParamsString := GetValue(nil, pgCacheKey)
 
 	pgParams, err := getPgParamsFromString(pgParamsString)
 	if err != nil {
