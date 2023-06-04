@@ -19,7 +19,7 @@ func startRedisConnection() {
 	initialized = true
 }
 
-func getValue(ctx context.Context, key string) (string, error) {
+func GetValue(ctx context.Context, key string) (string, error) {
 	if !initialized {
 		startRedisConnection()
 	}
@@ -34,7 +34,7 @@ func getValue(ctx context.Context, key string) (string, error) {
 	return val, nil
 }
 
-func cacheData(ctx context.Context, key string, value string, expirationDuration time.Duration) {
+func CacheData(ctx context.Context, key string, value string, expirationDuration time.Duration) {
 	if !initialized {
 		startRedisConnection()
 	}
@@ -52,7 +52,7 @@ func cacheData(ctx context.Context, key string, value string, expirationDuration
 	}
 }
 
-func deleteValue(ctx context.Context, key string) {
+func DeleteValue(ctx context.Context, key string) {
 	if !initialized {
 		startRedisConnection()
 	}

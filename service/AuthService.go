@@ -39,7 +39,7 @@ func GetPg(nonce string, requestMessageId int) PgParams {
 
 	// save to cache
 	cacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
-	cacheData(nil, cacheKey, pgResponse.String(), 20*time.Minute)
+	CacheData(nil, cacheKey, pgResponse.String(), 20*time.Minute)
 
 	return pgResponse
 }
@@ -48,7 +48,7 @@ func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicK
 	b := randomInt()
 	// get PgParams from cache
 	pgCacheKey := getCacheKey(nonce, serverNonce, pgMethodName)
-	pgParamsString, err := getValue(nil, pgCacheKey)
+	pgParamsString, err := GetValue(nil, pgCacheKey)
 	if err != nil {
 		return DHParams{}, fmt.Errorf("pgParams not found or expired for nonce %s and serverNonce %s", nonce, serverNonce)
 	}
@@ -62,7 +62,7 @@ func GetDHParams(nonce string, serverNonce string, messageId int, requestPublicK
 	commonKey := (requestPublicKey ^ b) % pgParams.P
 
 	dhCacheKey := getCacheKey(nonce, serverNonce, dhMethodName)
-	cacheData(nil, dhCacheKey, string(rune(commonKey)), 20*time.Minute)
+	CacheData(nil, dhCacheKey, string(rune(commonKey)), 20*time.Minute)
 
 	responseMessageId := randomOddInt()
 	dhParams := DHParams{
